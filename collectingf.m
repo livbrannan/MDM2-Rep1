@@ -23,8 +23,7 @@ mask = [
 % Get the size of the image
 [imgRows, imgCols] = size(grayImage2);
 
-% Initialize cell array to store F vectors
-allFVectors = cell(maskRows, maskCols);
+cell_of_matrices = cell(maskRows, maskCols);
 
 % Iterate over each position in the mask
 for i = 1:maskRows
@@ -45,22 +44,19 @@ for i = 1:maskRows
         % Extract the sub-image corresponding to the current shifted mask position
         subImage = double(grayImage2(startRow:endRow, startCol:endCol));
 
-        % Calculate the F vector for the current sub-image
-        F = subImage(:) - subImage(3, 3);
-
-        % Store the F vector in the cell array
-        allFVectors{i, j} = F;
+        % Store the results in a cell array
+         cell_of_matrices{i, j} = struct('ShiftedMask', shiftedMask, 'SubImage', subImage);
+  
     end
 end
 
-% Display the F vectors for each shifted mask position
+% Display the results for each shifted mask position
 for i = 1:maskRows
     for j = 1:maskCols
         disp(['Shifted Mask at Position (' num2str(i) ',' num2str(j) '):']);
         disp('Shifted Mask:');
-        disp(circshift(mask, [3-i, 3-j]));
-        disp('F Vector:');
-        disp(allFVectors{i, j});
+        disp(cell_of_matrices{i,j}.ShiftedMask);
         disp('---------------------');
+        approx_grad = differentials(cell_of_matrices{i,j}.ShiftedMask)
     end
 end
