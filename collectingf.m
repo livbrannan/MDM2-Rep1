@@ -84,6 +84,9 @@ for i = 1:maskRows
         % the gradient field matrix
         approx_grad_1(i,j) = approx_grad(1);
         approx_grad_2(i,j) = approx_grad(2);
+        
+
+
         smoothed_approx_grad = imgaussfilt(approx_grad, 2); 
         M = reconstruct(smoothed_approx_grad);
         cell_of_M_values{i,j} = M;
@@ -94,5 +97,15 @@ for i = 1:maskRows
         % smoothed grad in a cell
     end
 end
-approx_grad_1
-approx_grad_2
+smoothed_approx_grad_1 = imgaussfilt(approx_grad_1);
+smoothed_approx_grad_2 = imgaussfilt(approx_grad_2);
+
+new_cell_smoothed = cell(maskRows, maskCols);
+
+for i=1:5
+    for j=1:j
+        new_cell_smoothed{i,j} = [smoothed_approx_grad_1(i,j); smoothed_approx_grad_2(i,j)];
+    end
+end
+
+
