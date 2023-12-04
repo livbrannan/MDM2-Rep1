@@ -5,8 +5,8 @@ grayImage2 = rgb2gray(image_2); %this function takes any image of colour
 %or not and converts it to a greyscale image. 
 
 distorted_image = imnoise(grayImage2, 'salt & pepper'); %distort the image
-figure
-imshow(distorted_image)
+% figure
+% imshow(distorted_image)
 
 window_size = 5;
 
@@ -69,6 +69,8 @@ end
 gf_matrix = zeros(5,5); %creating empty 5x5 to store the gradient field for each position
 cell_of_grads = cell(maskRows, maskCols); %create cell to store every approx_grad
 cell_of_smoothed_grads = cell(maskRows, maskCols); % create cell to store smoothed approx_grads
+cell_of_M_values = cell(maskRows, maskCols);
+
 
 % Display the results for each shifted mask position
 for i = 1:maskRows
@@ -79,10 +81,14 @@ for i = 1:maskRows
         disp('---------------------');
         approx_grad = differentials(cell_of_matrices{i,j}.ShiftedMask); % call differential function to compute 
         % the gradient field matrix
-        gf_matrix(i, j) = approx_grad(1); % extract the first derivative of the grad field
-        cell_of_grads{i, j} = approx_grad(:);
-        smoothed_approx_grad = imgaussfilt(approx_grad, 2); % smoothing image with gaussian filter
-        cell_of_smoothed_grads{i, j} = smoothed_approx_grad;
+
+        smoothed_approx_grad = imgaussfilt(approx_grad, 2); 
+        M = reconstruct(smoothed_approx_grad);
+        cell_of_M_values{i,j} = M;
+        % gf_matrix(i, j) = approx_grad(1); % extract the first derivative of the grad field
+        % cell_of_grads{i, j} = approx_grad(:);
+        % smoothed_approx_grad = imgaussfilt(approx_grad, 2); % smoothing image with gaussian filter
+        % cell_of_smoothed_grads{i, j} = smoothed_approx_grad; %stores each smoothed grad in a cell
+        cell_of_M_values{i,j}
     end
 end
-cell_of_dms = reconstruction(cell_of_smoothed_grads)
