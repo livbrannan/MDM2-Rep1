@@ -70,7 +70,8 @@ gf_matrix = zeros(5,5); %creating empty 5x5 to store the gradient field for each
 cell_of_grads = cell(maskRows, maskCols); %create cell to store every approx_grad
 cell_of_smoothed_grads = cell(maskRows, maskCols); % create cell to store smoothed approx_grads
 cell_of_M_values = cell(maskRows, maskCols);
-
+approx_grad_1 = zeros(maskRows, maskCols);
+approx_grad_2 = zeros(maskRows, maskCols);
 
 % Display the results for each shifted mask position
 for i = 1:maskRows
@@ -81,14 +82,17 @@ for i = 1:maskRows
         disp('---------------------');
         approx_grad = differentials(cell_of_matrices{i,j}.ShiftedMask); % call differential function to compute 
         % the gradient field matrix
-
+        approx_grad_1(i,j) = approx_grad(1);
+        approx_grad_2(i,j) = approx_grad(2);
         smoothed_approx_grad = imgaussfilt(approx_grad, 2); 
         M = reconstruct(smoothed_approx_grad);
         cell_of_M_values{i,j} = M;
         % gf_matrix(i, j) = approx_grad(1); % extract the first derivative of the grad field
         % cell_of_grads{i, j} = approx_grad(:);
         % smoothed_approx_grad = imgaussfilt(approx_grad, 2); % smoothing image with gaussian filter
-        % cell_of_smoothed_grads{i, j} = smoothed_approx_grad; %stores each smoothed grad in a cell
-        cell_of_M_values{i,j}
+        % cell_of_smoothed_grads{i, j} = smoothed_approx_grad; %stores each
+        % smoothed grad in a cell
     end
 end
+approx_grad_1
+approx_grad_2
