@@ -1,27 +1,43 @@
 % Read the image
 image_2 = imread('flower.jpeg');
 
-% Convert to grayscale if it's a color image
-if size(image_2, 3) == 3
-    grayImage2 = rgb2gray(image_2);
-else
-    grayImage2 = image_2;
-end
+grayImage2 = rgb2gray(image_2); %this function takes any image of colour 
+%or not and converts it to a greyscale image. 
+
+distorted_image = imnoise(grayImage2, 'salt & pepper'); %distort the image
+figure
+imshow(distorted_image)
+
+window_size = 5;
+
+% Pad the matrix to handle edge cases
+paddedMatrix = padarray(pixelMatrix, [window_size-1, window_size-1], 0, 'both');
+
+% Calculate the variance for all 5x5 windows
+windowVariances = nlfilter(paddedMatrix, [window_size window_size], @(x) var(x(:)));
+
+% Find the top-left indices of the 5x5 matrix with the largest variance
+[maxVariance, maxIndex] = max(windowVariances(:));
+
+% Convert the linear index to subscripts
+[topLeftRowIndex, topLeftColIndex] = ind2sub(size(windowVariances), maxIndex);
+
+% Adjust indices to ensure they are within bounds
+topLeftRowIndex = max(1, min(topLeftRowIndex, size(pixelMatrix, 1) - window_size + 1));
+topLeftColIndex = max(1, min(topLeftColIndex, size(pixelMatrix, 2) - window_size + 1));
+
+% Extract the 5x5 matrix with the largest variance
+maxVarianceMatrix = pixelMatrix(topLeftRowIndex:topLeftRowIndex+window_size-1, ...
+    topLeftColIndex:topLeftColIndex+window_size-1);
 
 % Define the 5x5 matrix as the mask
-mask = [
-    193   214   222   231   232
-    183   192   206   222   231
-    188   184   191   204   217
-    189   188   185   188   201
-    189   191   191   191   192
-];
+mask = maxVarianceMatrix;
 
 % Get the size of the mask
 [maskRows, maskCols] = size(mask);
 
 % Get the size of the image
-[imgRows, imgCols] = size(grayImage2);
+[imgRows, imgCols] = size(distorted_image);
 
 cell_of_matrices = cell(maskRows, maskCols);
 
@@ -42,13 +58,15 @@ for i = 1:maskRows
         endCol = min(imgCols, endCol);
 
         % Extract the sub-image corresponding to the current shifted mask position
-        subImage = double(grayImage2(startRow:endRow, startCol:endCol));
+        subImage = double(distorted_image(startRow:endRow, startCol:endCol));
 
         % Store the results in a cell array
          cell_of_matrices{i, j} = struct('ShiftedMask', shiftedMask, 'SubImage', subImage);
   
     end
 end
+
+gf_matrix = zeros(5,5); %creating empty 5x5 to store the gradient field for each position
 
 % Display the results for each shifted mask position
 for i = 1:maskRows
@@ -57,6 +75,9 @@ for i = 1:maskRows
         disp('Shifted Mask:');
         disp(cell_of_matrices{i,j}.ShiftedMask);
         disp('---------------------');
-        approx_grad = differentials(cell_of_matrices{i,j}.ShiftedMask)
+        approx_grad = differentials(cell_of_matrices{i,j}.ShiftedMask); %call differential function to compute 
+        % the gradient field matrix
+        gf_matrix(i,j) = approx_grad(1); %extract the first derivative of the grad field
     end
 end
+smoothed_gf_matrix = imgaussfilt(gf_matrix, 2); %smoothing image with gaussian filter
