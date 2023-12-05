@@ -1,19 +1,26 @@
 function approx_grad2=differentials2(mat)
-
+    global nrows;
+    global ncols;
+    [nrows, ncols]= size(mat);
+    global centre;
+    centre= [ceil(nrows/2), ceil(ncols/2)];
     z=1;
+    global A;
+    
+    A=[];
+    F=zeros((nrows*ncols)-1,1);
 
-    A=[-2, 2, 2, 2, -4; -1, 2, 0.5, 2, -2; 0, 2, 0, 2, 0; 1, 2, 0.5, 2, 2; 2, 2, 2, 2, 4; -2, 1, 2, 0.5, -2; -1, 1, 0.5, 0.5, -1; 0, 1, 0, 0.5, 0; 1, 1, 0.5, 0.5, 1; 2, 1, 2, 0.5, 2; -2, 0, 2, 0, 0; -1, 0 , 0.5, 0, 0; 1, 0, 0.5, 0, 0; 2, 0, 2, 0, 0; -2, -1, 2, 0.5, 2; -1, -1, 0.5, 0.5, 1; 0, -1, 0, 0.5, 0; 1, -1, 0.5, 0.5, -1; 2, -1, 2, 0.5, -2; -2, -2, 2, 2, 4; -1, -2, 0.5, 2, 2; 0, -2, 0, 2, 0; 1, -2, 0.5, 2, -2; 2, -2, 0.5, 2, -2];
+    for i = 1:nrows
 
-    F=zeros(24,1);
+        for j = 1:ncols
 
-    for i = 1:5
-
-        for j = 1:5
-
-            if ~ (i==3 && j==3)
-
-                F(z,1) = mat(i,j) - mat(3,3);
-
+            if ~ (i==centre(1) && j==centre(2))
+                newrow=[];
+                F(z,1) = mat(i,j) - mat(centre(1),centre(2));
+                dx=j-centre(1);
+                dy=i-centre(2);
+                newrow=[dx, dy, ((dx)^2)/2, ((dy)^2)/2, dx*dy];
+                A=[A; newrow];
                 z = z + 1;
 
             end
@@ -21,7 +28,7 @@ function approx_grad2=differentials2(mat)
         end
 
     end
-
+   
     F1 = A'*F;
 
     A2 = A'*A;
@@ -29,3 +36,7 @@ function approx_grad2=differentials2(mat)
  
 
     inverse_A2 = inv(A2);
+
+ 
+
+    approx_grad2= inverse_A2*F1;
