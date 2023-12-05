@@ -1,0 +1,10 @@
+function M=reconstruct(approx_grady)
+    global A;
+    B=A(:,1:2);
+    %disp(B)
+    C = (inv(A' * A) * A')';
+    %disp(C)
+    %disp(approx_grad)
+    M = C * approx_grady;
+    %disp(M)
+end
